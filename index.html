@@ -31,9 +31,8 @@
   <button id="startButton" class="hidden">Iniciar AR</button>
   <button id="soundButton" class="hidden">Activar Sonido</button>
 
-  <!-- Contenedor de la escena A-Frame -->
   <div id="sceneContainer" style="display: none;">
-    <a-scene embedded arjs="sourceType: webcam; detectionMode: mono_and_matrix; matrixCodeType: 3x3; debugUIEnabled: false;">
+    <a-scene id="arScene" embedded arjs="sourceType: webcam; detectionMode: mono_and_matrix; matrixCodeType: 3x3;">
       <a-marker type="barcode" value="32">
         <a-video 
           id="arVideoDisplay"
@@ -66,38 +65,44 @@
       videoReady = true;
     });
 
-    // Solicitar permiso de cámara al cargar la página y esperar respuesta
-    window.addEventListener('load', function () {
-      navigator.mediaDevices.getUserMedia({ video: true })
+    // Función para solicitar permiso de cámara y manejar la respuesta
+    function requestCameraAccess() {
+      return navigator.mediaDevices.getUserMedia({ video: true })
         .then(function(stream) {
-          startButton.classList.remove('hidden'); // Mostrar botón de inicio solo si se concede el permiso
+          startButton.classList.remove('hidden'); // Mostrar botón de inicio
         })
         .catch(function(error) {
           console.error("Error al activar la cámara:", error);
           alert("No se pudo acceder a la cámara. Por favor, permite el acceso a la cámara.");
         });
+    }
+
+    // Iniciar la solicitud de acceso a la cámara
+    window.addEventListener('load', function () {
+      requestCameraAccess();
     });
 
-    // Función para inicializar la escena de A-Frame y reiniciar la cámara
+    // Función para inicializar la escena de A-Frame y activar la cámara
     function initAR() {
-      sceneContainer.style.display = "block";
+      sceneContainer.style.display = "block"; // Mostrar el contenedor de la escena
+      const arjsScene = document.getElementById('arScene');
+
       // Reiniciar la configuración de AR.js para forzar la cámara
-      const arjsScene = document.querySelector('a-scene');
       arjsScene.setAttribute('arjs', 'sourceType: webcam; detectionMode: mono_and_matrix; matrixCodeType: 3x3;');
       videoReady = true;
     }
 
-    // Configurar el botón "Iniciar AR" para mostrar la escena y activar la cámara
+    // Configurar el botón "Iniciar AR"
     startButton.addEventListener('click', function () {
-      startButton.classList.add('hidden');
-      initAR();
+      startButton.classList.add('hidden'); // Ocultar botón
+      initAR(); // Iniciar AR
     });
 
     // Evento cuando el marcador es detectado
     document.querySelector('a-marker').addEventListener('markerFound', function() {
       if (videoReady) {
         videoAR.play();
-        soundButton.classList.remove('hidden'); // Mostrar botón para activar sonido
+        soundButton.classList.remove('hidden'); // Mostrar botón de sonido
       }
     });
 
@@ -108,8 +113,8 @@
 
     // Botón para activar el sonido del video
     soundButton.addEventListener('click', function () {
-      videoAR.muted = false;
-      soundButton.classList.add('hidden'); // Ocultar botón después de activar sonido
+      videoAR.muted = false; // Activar sonido
+      soundButton.classList.add('hidden'); // Ocultar botón de sonido
     });
   </script>
 
