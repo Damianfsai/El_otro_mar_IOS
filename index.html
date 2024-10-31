@@ -66,12 +66,11 @@
       videoReady = true;
     });
 
-    // Solicitar permiso de cámara al cargar la página
+    // Solicitar permiso de cámara al cargar la página y esperar respuesta
     window.addEventListener('load', function () {
       navigator.mediaDevices.getUserMedia({ video: true })
         .then(function(stream) {
-          // Si se concede el permiso, mostramos el botón "Iniciar AR"
-          startButton.classList.remove('hidden');
+          startButton.classList.remove('hidden'); // Mostrar botón de inicio solo si se concede el permiso
         })
         .catch(function(error) {
           console.error("Error al activar la cámara:", error);
@@ -79,12 +78,12 @@
         });
     });
 
-    // Función para inicializar la escena de A-Frame y forzar el reinicio de la cámara
+    // Función para inicializar la escena de A-Frame y reiniciar la cámara
     function initAR() {
       sceneContainer.style.display = "block";
-      // Forzar a A-Frame a reiniciar AR.js
+      // Reiniciar la configuración de AR.js para forzar la cámara
       const arjsScene = document.querySelector('a-scene');
-      arjsScene.components['arjs'].setupArSource();
+      arjsScene.setAttribute('arjs', 'sourceType: webcam; detectionMode: mono_and_matrix; matrixCodeType: 3x3;');
       videoReady = true;
     }
 
