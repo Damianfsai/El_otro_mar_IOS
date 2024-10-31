@@ -28,24 +28,27 @@
 </head>
 <body>
 
-  <button id="startButton" class="hidden">Iniciar AR</button>
+  <button id="startButton">Iniciar AR</button>
   <button id="soundButton" class="hidden">Activar Sonido</button>
 
-  <a-scene embedded arjs="sourceType: webcam; detectionMode: mono_and_matrix; matrixCodeType: 3x3; debugUIEnabled: false;">
-    <a-marker type="barcode" value="32">
-      <a-video 
-        id="arVideo"
-        src="#videoAR" 
-        position="-1.3 -1.7 0.1"
-        rotation="-120 -160 0"
-        width="1.9"
-        height="0.75"
-        crossorigin="anonymous"
-        scale="0.2 0.2 0.2">
-      </a-video>
-    </a-marker>
-    <a-entity camera></a-entity>
-  </a-scene>
+  <!-- Contenedor de la escena A-Frame (oculto inicialmente) -->
+  <div id="sceneContainer" style="display: none;">
+    <a-scene embedded arjs="sourceType: webcam; detectionMode: mono_and_matrix; matrixCodeType: 3x3; debugUIEnabled: false;">
+      <a-marker type="barcode" value="32">
+        <a-video 
+          id="arVideo"
+          src="#videoAR" 
+          position="-1.3 -1.7 0.1"
+          rotation="-120 -160 0"
+          width="1.9"
+          height="0.75"
+          crossorigin="anonymous"
+          scale="0.2 0.2 0.2">
+        </a-video>
+      </a-marker>
+      <a-entity camera></a-entity>
+    </a-scene>
+  </div>
 
   <video id="videoAR" loop playsinline muted style="display: none;">
     <source src="MVI_1034_1.mp4" type="video/mp4">
@@ -56,39 +59,40 @@
     var videoAR = document.getElementById('videoAR');
     var startButton = document.getElementById('startButton');
     var soundButton = document.getElementById('soundButton');
+    var sceneContainer = document.getElementById('sceneContainer');
     var videoReady = false;
 
     videoAR.addEventListener('loadeddata', function() {
       videoReady = true;
     });
 
-    window.addEventListener('load', function () {
-      if (isMobile()) {
-        startButton.classList.remove('hidden');
-      } else {
-        videoReady = true;
-      }
-    });
-
-    function isMobile() {
-      return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    }
-
+    // Configuramos el botón "Iniciar AR" para solicitar permisos de cámara y mostrar la escena
     startButton.addEventListener('click', function () {
       startButton.classList.add('hidden');
-      // Solo iniciamos la cámara, pero el video no se reproduce hasta detectar el marcador
-      videoReady = true;
+      sceneContainer.style.display = "block"; // Mostramos la escena de AR solo después del clic
+
+      // Intentamos iniciar la cámara a través de A-Frame/AR.js al hacer clic en "Iniciar AR"
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(function(stream) {
+          // Si la cámara es activada, AR.js puede usarla
+          sceneContainer.style.display = "block";
+          videoReady = true;
+        })
+        .catch(function(error) {
+          console.error("Error al activar la cámara:", error);
+          alert("No se pudo acceder a la cámara. Por favor, permite el acceso a la cámara.");
+        });
     });
 
-    // Cuando el marcador es detectado, inicia el video
+    // Iniciar el video solo al detectar el marcador
     document.querySelector('a-marker').addEventListener('markerFound', function() {
       if (videoReady) {
         videoAR.play();
-        soundButton.classList.remove('hidden'); // Mostrar botón de activar sonido
+        soundButton.classList.remove('hidden'); // Mostrar botón para activar sonido
       }
     });
 
-    // Cuando el marcador se pierde, pausamos el video
+    // Pausar el video cuando se pierde el marcador
     document.querySelector('a-marker').addEventListener('markerLost', function() {
       videoAR.pause();
     });
