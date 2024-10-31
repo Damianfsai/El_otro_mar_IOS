@@ -79,15 +79,16 @@
         });
     });
 
-    // Función para inicializar la escena de A-Frame
+    // Función para inicializar la escena de A-Frame y forzar el reinicio de la cámara
     function initAR() {
       sceneContainer.style.display = "block";
-      // Forzar a A-Frame a reiniciar el AR después de recibir permiso
-      document.querySelector('a-scene').setAttribute('arjs', 'sourceType: webcam;');
+      // Forzar a A-Frame a reiniciar AR.js
+      const arjsScene = document.querySelector('a-scene');
+      arjsScene.components['arjs'].setupArSource();
       videoReady = true;
     }
 
-    // Configurar el botón "Iniciar AR" para mostrar la escena
+    // Configurar el botón "Iniciar AR" para mostrar la escena y activar la cámara
     startButton.addEventListener('click', function () {
       startButton.classList.add('hidden');
       initAR();
