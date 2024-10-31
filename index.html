@@ -1,56 +1,94 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AR Video con MindAR.js</title>
-    <script src="https://cdn.jsdelivr.net/gh/MindAR-js/aframe/dist/aframe.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/MindAR-js/aframe/dist/mind-ar.js"></script>
-    <style>
-        body { margin: 0; }
-        video { display: none; } /* Ocultar el video original */
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Realidad Aumentada con Barcode</title>
+  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar-nft.min.js"></script>
+  <style>
+    body, html { margin: 0; padding: 0; overflow: hidden; }
+    #startButton {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 20px;
+      background-color: #007bff;
+      color: white;
+      font-size: 18px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      z-index: 1000;
+    }
+    #startButton.hidden { display: none; }
+  </style>
 </head>
 <body>
-    <mind-ar>
-        <!-- Definir el marcador de código de barras -->
-        <a-marker type="barcode" value="32">
-            <!-- Video que aparecerá sobre el marcador -->
-            <a-video 
-                id="arVideo"
-                src="#videoAR" 
-                position="0 0 0" 
-                rotation="-90 0 0"
-                width="1.6" 
-                height="0.9" 
-                crossorigin="anonymous"
-                scale="1 1 1">
-            </a-video>
-        </a-marker>
-        <!-- Cámara para la escena -->
-        <a-entity camera></a-entity>
-    </mind-ar>
 
-    <!-- Video oculto para AR -->
-    <video id="videoAR" loop playsinline muted>
-        <source src="MVI_1034_1.mp4" type="video/mp4">
-        Tu navegador no soporta la reproducción de este video.
-    </video>
+  <!-- Botón para iniciar la reproducción en móviles -->
+  <button id="startButton" class="hidden">Iniciar AR</button>
 
-    <script>
-        const videoAR = document.getElementById('videoAR');
-        const marker = document.querySelector('a-marker');
+  <!-- Escena de AR con marcador barcode -->
+  <a-scene embedded arjs="sourceType: webcam; detectionMode: mono_and_matrix; matrixCodeType: 3x3; debugUIEnabled: false;">
+    <a-marker type="barcode" value="32">
+      <a-video 
+        id="arVideo"
+        src="#videoAR" 
+        position="-1.3 -1.7 0.1"   <!-- Ajuste de posición para centrar sobre el marcador -->
+        rotation="-120 -160 0"   <!-- Rotación para alinear el video con la cámara y el marcador -->
+        width="1.9"          <!-- Ancho ajustado para alinearse con el tamaño del marcador -->
+        height="0.75"        <!-- Alto ajustado para mantener la proporción -->
+        crossorigin="anonymous"
+        scale="0.2 0.2 0.2">
+      </a-video>
+    </a-marker>
+    <a-entity camera></a-entity>
+  </a-scene>
 
-        // Cuando el marcador es detectado
-        marker.addEventListener('markerFound', function() {
-            videoAR.play(); // Reproducir video
-        });
+  <!-- Video oculto para AR -->
+  <video id="videoAR" loop muted playsinline style="display: none;">
+    <source src="MVI_1034_1.mp4" type="video/mp4">
+    Tu navegador no soporta la reproducción de este video.
+  </video>
 
-        // Cuando el marcador se pierde
-        marker.addEventListener('markerLost', function() {
-            videoAR.pause(); // Pausar video
-            videoAR.currentTime = 0; // Reiniciar video al inicio
-        });
-    </script>
+  <script>
+    var videoAR = document.getElementById('videoAR');
+    var startButton = document.getElementById('startButton');
+    var videoReady = false;
+
+    videoAR.addEventListener('loadeddata', function() {
+      videoReady = true;
+    });
+
+    window.addEventListener('load', function () {
+      if (isMobile()) {
+        startButton.classList.remove('hidden');
+      } else {
+        videoReady = true;
+      }
+    });
+
+    function isMobile() {
+      return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    }
+
+    startButton.addEventListener('click', function () {
+      startButton.classList.add('hidden');
+      videoReady = true;
+    });
+
+    document.querySelector('a-marker').addEventListener('markerFound', function() {
+      if (videoReady) {
+        videoAR.play();
+      }
+    });
+
+    document.querySelector('a-marker').addEventListener('markerLost', function() {
+      videoAR.pause();
+    });
+  </script>
+
 </body>
 </html>
