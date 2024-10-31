@@ -1,123 +1,56 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Realidad Aumentada con Barcode</title>
-  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-  <script src="https://cdn.rawgit.com/jeromeetienne/ar.js/1.7.7/aframe/build/aframe-ar.js">
-  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar-nft.min.js"></script>
-  <style>
-    body, html { margin: 0; padding: 0; overflow: hidden; }
-    #startButton, #soundButton {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      padding: 20px;
-      background-color: #007bff;
-      color: white;
-      font-size: 18px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      z-index: 1000;
-    }
-    #startButton.hidden, #soundButton.hidden { display: none; }
-    #soundButton { top: 70%; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR Video con MindAR.js</title>
+    <script src="https://cdn.jsdelivr.net/gh/MindAR-js/aframe/dist/aframe.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/MindAR-js/aframe/dist/mind-ar.js"></script>
+    <style>
+        body { margin: 0; }
+        video { display: none; } /* Ocultar el video original */
+    </style>
 </head>
 <body>
+    <mind-ar>
+        <!-- Definir el marcador de código de barras -->
+        <a-marker type="barcode" value="32">
+            <!-- Video que aparecerá sobre el marcador -->
+            <a-video 
+                id="arVideo"
+                src="#videoAR" 
+                position="0 0 0" 
+                rotation="-90 0 0"
+                width="1.6" 
+                height="0.9" 
+                crossorigin="anonymous"
+                scale="1 1 1">
+            </a-video>
+        </a-marker>
+        <!-- Cámara para la escena -->
+        <a-entity camera></a-entity>
+    </mind-ar>
 
-  <button id="startButton" class="hidden">Iniciar AR</button>
-  <button id="soundButton" class="hidden">Activar Sonido</button>
+    <!-- Video oculto para AR -->
+    <video id="videoAR" loop playsinline muted>
+        <source src="MVI_1034_1.mp4" type="video/mp4">
+        Tu navegador no soporta la reproducción de este video.
+    </video>
 
-  <div id="sceneContainer" style="display: none;">
-    <a-scene id="arScene" embedded arjs="sourceType: webcam; detectionMode: mono_and_matrix; matrixCodeType: 3x3;">
-      <a-marker type="barcode" value="32">
-        <a-video 
-          id="arVideoDisplay"
-          src="#videoAR" 
-          position="-1.3 -1.7 0.1"
-          rotation="-120 -160 0"
-          width="1.9"
-          height="0.75"
-          crossorigin="anonymous"
-          scale="0.2 0.2 0.2">
-        </a-video>
-      </a-marker>
-      <a-entity camera></a-entity>
-    </a-scene>
-  </div>
+    <script>
+        const videoAR = document.getElementById('videoAR');
+        const marker = document.querySelector('a-marker');
 
-  <video id="videoAR" loop playsinline muted style="display: none;">
-    <source src="MVI_1034_1.mp4" type="video/mp4">
-    Tu navegador no soporta la reproducción de este video.
-  </video>
-
-  <script>
-    var videoAR = document.getElementById('videoAR');
-    var startButton = document.getElementById('startButton');
-    var soundButton = document.getElementById('soundButton');
-    var sceneContainer = document.getElementById('sceneContainer');
-    var videoReady = false;
-
-    videoAR.addEventListener('loadeddata', function() {
-      videoReady = true;
-    });
-
-    // Función para solicitar permiso de cámara y manejar la respuesta
-    function requestCameraAccess() {
-      return navigator.mediaDevices.getUserMedia({ video: true })
-        .then(function(stream) {
-          startButton.classList.remove('hidden'); // Mostrar botón de inicio
-        })
-        .catch(function(error) {
-          console.error("Error al activar la cámara:", error);
-          alert("No se pudo acceder a la cámara. Por favor, permite el acceso a la cámara.");
+        // Cuando el marcador es detectado
+        marker.addEventListener('markerFound', function() {
+            videoAR.play(); // Reproducir video
         });
-    }
 
-    // Iniciar la solicitud de acceso a la cámara
-    window.addEventListener('load', function () {
-      requestCameraAccess();
-    });
-
-    // Función para inicializar la escena de A-Frame y activar la cámara
-    function initAR() {
-      sceneContainer.style.display = "block"; // Mostrar el contenedor de la escena
-      const arjsScene = document.getElementById('arScene');
-
-      // Reiniciar la configuración de AR.js para forzar la cámara
-      arjsScene.setAttribute('arjs', 'sourceType: webcam; detectionMode: mono_and_matrix; matrixCodeType: 3x3;');
-      videoReady = true;
-    }
-
-    // Configurar el botón "Iniciar AR"
-    startButton.addEventListener('click', function () {
-      startButton.classList.add('hidden'); // Ocultar botón
-      initAR(); // Iniciar AR
-    });
-
-    // Evento cuando el marcador es detectado
-    document.querySelector('a-marker').addEventListener('markerFound', function() {
-      if (videoReady) {
-        videoAR.play();
-        soundButton.classList.remove('hidden'); // Mostrar botón de sonido
-      }
-    });
-
-    // Pausar el video cuando se pierde el marcador
-    document.querySelector('a-marker').addEventListener('markerLost', function() {
-      videoAR.pause();
-    });
-
-    // Botón para activar el sonido del video
-    soundButton.addEventListener('click', function () {
-      videoAR.muted = false; // Activar sonido
-      soundButton.classList.add('hidden'); // Ocultar botón de sonido
-    });
-  </script>
-
+        // Cuando el marcador se pierde
+        marker.addEventListener('markerLost', function() {
+            videoAR.pause(); // Pausar video
+            videoAR.currentTime = 0; // Reiniciar video al inicio
+        });
+    </script>
 </body>
 </html>
