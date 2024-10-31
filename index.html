@@ -28,7 +28,7 @@
 </head>
 <body>
 
-  <button id="startButton">Iniciar AR</button>
+  <button id="startButton" class="hidden">Iniciar AR</button>
   <button id="soundButton" class="hidden">Activar Sonido</button>
 
   <!-- Contenedor de la escena A-Frame -->
@@ -66,24 +66,29 @@
       videoReady = true;
     });
 
-    // Función para inicializar la cámara y mostrar la escena
-    function initAR() {
-      sceneContainer.style.display = "block";
-      videoReady = true;
-    }
-
-    // Configurar el botón "Iniciar AR" para pedir permisos de cámara
-    startButton.addEventListener('click', function () {
+    // Solicitar permiso de cámara al cargar la página
+    window.addEventListener('load', function () {
       navigator.mediaDevices.getUserMedia({ video: true })
         .then(function(stream) {
-          // Si se concede el permiso, mostramos la escena de A-Frame
-          initAR();
-          startButton.classList.add('hidden');
+          // Mostrar el botón "Iniciar AR" solo si el permiso fue concedido
+          startButton.classList.remove('hidden');
         })
         .catch(function(error) {
           console.error("Error al activar la cámara:", error);
           alert("No se pudo acceder a la cámara. Por favor, permite el acceso a la cámara.");
         });
+    });
+
+    // Función para inicializar la escena de A-Frame
+    function initAR() {
+      sceneContainer.style.display = "block";
+      videoReady = true;
+    }
+
+    // Configurar el botón "Iniciar AR" para mostrar la escena
+    startButton.addEventListener('click', function () {
+      startButton.classList.add('hidden');
+      initAR();
     });
 
     // Evento cuando el marcador es detectado
