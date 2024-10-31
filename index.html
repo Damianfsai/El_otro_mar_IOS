@@ -76,24 +76,27 @@
 
     startButton.addEventListener('click', function () {
       startButton.classList.add('hidden');
+      // Solo iniciamos la cámara, pero el video no se reproduce hasta detectar el marcador
       videoReady = true;
-      videoAR.play();
-      soundButton.classList.remove('hidden'); // Muestra el botón de sonido después de iniciar el video
     });
 
-    soundButton.addEventListener('click', function () {
-      videoAR.muted = false;
-      soundButton.classList.add('hidden'); // Oculta el botón de sonido después de activarlo
-    });
-
+    // Cuando el marcador es detectado, inicia el video
     document.querySelector('a-marker').addEventListener('markerFound', function() {
       if (videoReady) {
         videoAR.play();
+        soundButton.classList.remove('hidden'); // Mostrar botón de activar sonido
       }
     });
 
+    // Cuando el marcador se pierde, pausamos el video
     document.querySelector('a-marker').addEventListener('markerLost', function() {
       videoAR.pause();
+    });
+
+    // Botón para activar el sonido del video
+    soundButton.addEventListener('click', function () {
+      videoAR.muted = false;
+      soundButton.classList.add('hidden'); // Ocultar botón después de activar sonido
     });
   </script>
 
