@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Realidad Aumentada con Barcode</title>
   <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar-nft.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.min.js"></script>
   <style>
     body, html { margin: 0; padding: 0; overflow: hidden; }
     #startButton {
@@ -28,27 +28,26 @@
 <body>
 
   <!-- Botón para iniciar la reproducción en móviles -->
-  <button id="startButton" class="hidden">Iniciar AR</button>
+  <button id="startButton">Iniciar AR</button>
 
-  <!-- Escena de AR con marcador barcode -->
-  <a-scene embedded arjs="sourceType: webcam; detectionMode: mono_and_matrix; matrixCodeType: 3x3; debugUIEnabled: false;">
+  <!-- Escena de AR con marcador barcode y suavizado activado -->
+  <a-scene embedded arjs="sourceType: webcam; detectionMode: mono_and_matrix; matrixCodeType: 3x3; debugUIEnabled: false; smooth: true; smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2;">
     <a-marker type="barcode" value="32">
       <a-video 
         id="arVideo"
         src="#videoAR" 
-        position="-1.3 -1.7 0.1"   <!-- Ajuste de posición para centrar sobre el marcador -->
-        rotation="-120 -160 0"   <!-- Rotación para alinear el video con la cámara y el marcador -->
-        width="1.9"          <!-- Ancho ajustado para alinearse con el tamaño del marcador -->
-        height="0.75"        <!-- Alto ajustado para mantener la proporción -->
-        crossorigin="anonymous"
-        scale="0.2 0.2 0.2">
+        position="-1.7 -1.9 0" 
+        rotation="-80 18.6 -15"
+        width="0.6"        
+        height="0.4"
+        crossorigin="anonymous">
       </a-video>
     </a-marker>
     <a-entity camera></a-entity>
   </a-scene>
 
   <!-- Video oculto para AR -->
-  <video id="videoAR" loop muted playsinline style="display: none;">
+  <video id="videoAR" loop playsinline style="display: none;">
     <source src="MVI_1034_1.mp4" type="video/mp4">
     Tu navegador no soporta la reproducción de este video.
   </video>
@@ -58,10 +57,7 @@
     var startButton = document.getElementById('startButton');
     var videoReady = false;
 
-    videoAR.addEventListener('loadeddata', function() {
-      videoReady = true;
-    });
-
+    // Configura el tamaño del video en AR en la carga de la página
     window.addEventListener('load', function () {
       if (isMobile()) {
         startButton.classList.remove('hidden');
@@ -74,17 +70,20 @@
       return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     }
 
+    // Iniciar la cámara y video solo después de la interacción del usuario en dispositivos móviles
     startButton.addEventListener('click', function () {
       startButton.classList.add('hidden');
       videoReady = true;
     });
 
+    // Reproduce el video cuando se detecta el marcador
     document.querySelector('a-marker').addEventListener('markerFound', function() {
       if (videoReady) {
         videoAR.play();
       }
     });
 
+    // Pausa el video cuando se pierde el marcador
     document.querySelector('a-marker').addEventListener('markerLost', function() {
       videoAR.pause();
     });
