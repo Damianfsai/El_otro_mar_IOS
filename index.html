@@ -74,6 +74,10 @@
     startButton.addEventListener('click', function () {
       startButton.classList.add('hidden');
       videoReady = true;
+
+      // Activar el AR.js después de la interacción del usuario
+      const scene = document.querySelector('a-scene');
+      scene.setAttribute('arjs', 'sourceType: webcam; detectionMode: mono_and_matrix; matrixCodeType: 3x3; debugUIEnabled: false; smooth: true; smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2;');
     });
 
     // Reproduce el video cuando se detecta el marcador
