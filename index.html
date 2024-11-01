@@ -62,35 +62,29 @@
       try {
         await navigator.mediaDevices.getUserMedia({ video: true });
         console.log("Permiso para la cámara otorgado.");
+        initializeARScene(); // Llamar a la función que inicia AR después de obtener permiso
       } catch (error) {
         console.error("Error al intentar acceder a la cámara:", error);
       }
     }
 
-    // Configura el tamaño del video en AR en la carga de la página
-    window.addEventListener('load', function () {
-      if (isMobile()) {
-        startButton.classList.remove('hidden');
-      } else {
-        videoReady = true;
-      }
-    });
+    // Inicializa la escena AR después de obtener el permiso
+    function initializeARScene() {
+      const scene = document.querySelector('a-scene');
+      scene.setAttribute('arjs', 'sourceType: webcam; detectionMode: mono_and_matrix; matrixCodeType: 3x3; debugUIEnabled: false; smooth: true; smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2;');
+      videoReady = true;
+      console.log("Escena AR inicializada");
+    }
 
+    // Verifica si el dispositivo es móvil
     function isMobile() {
       return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     }
 
-    // Iniciar la cámara y video solo después de la interacción del usuario en dispositivos móviles
+    // Configura el evento de clic para el botón de inicio
     startButton.addEventListener('click', async function () {
       startButton.classList.add('hidden');
-      videoReady = true;
-
-      // Solicitar acceso a la cámara antes de iniciar AR
       await requestCameraAccess();
-
-      // Activar el AR.js después de la interacción del usuario
-      const scene = document.querySelector('a-scene');
-      scene.setAttribute('arjs', 'sourceType: webcam; detectionMode: mono_and_matrix; matrixCodeType: 3x3; debugUIEnabled: false; smooth: true; smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2;');
     });
 
     // Reproduce el video cuando se detecta el marcador
@@ -104,6 +98,7 @@
     document.querySelector('a-marker').addEventListener('markerLost', function() {
       videoAR.pause();
     });
+
   </script>
 
 </body>
