@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Realidad Aumentada con Barcode</title>
   <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@ar-js-org/ar.js@3.3.2/aframe/build/aframe-ar.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.min.js"></script>
   <style>
     body, html { margin: 0; padding: 0; overflow: hidden; }
     #startButton {
@@ -31,7 +31,7 @@
   <button id="startButton">Iniciar AR</button>
 
   <!-- Escena de AR con marcador barcode y suavizado activado -->
-  <a-scene embedded arjs="sourceType: webcam; detectionMode: mono_and_matrix; matrixCodeType: 3x3; debugUIEnabled: false; smooth: true; smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2;">
+  <a-scene embedded arjs="sourceType: webcam; detectionMode: mono_and_matrix; matrixCodeType: 3x3; debugUIEnabled: false; maxDetectionRate: 30; cameraParametersUrl: 'https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/examples/camera_para.dat'; smooth: true; smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2;">
     <a-marker type="barcode" value="32">
       <a-video 
         id="arVideo"
@@ -47,7 +47,7 @@
   </a-scene>
 
   <!-- Video oculto para AR -->
-  <video id="videoAR" loop playsinline muted style="display: none;">
+  <video id="videoAR" loop playsinline style="display: none;">
     <source src="MVI_1034_1.mp4" type="video/mp4">
     Tu navegador no soporta la reproducción de este video.
   </video>
@@ -57,34 +57,25 @@
     var startButton = document.getElementById('startButton');
     var videoReady = false;
 
-    // Solicitar permiso para acceder a la cámara
-    async function requestCameraAccess() {
-      try {
-        await navigator.mediaDevices.getUserMedia({ video: true });
-        console.log("Permiso para la cámara otorgado.");
-        initializeARScene(); // Llamar a la función que inicia AR después de obtener permiso
-      } catch (error) {
-        console.error("Error al intentar acceder a la cámara:", error);
+    // Configura el tamaño del video en AR en la carga de la página
+    window.addEventListener('load', function () {
+      if (isMobile()) {
+        startButton.classList.remove('hidden');
+      } else {
+        videoReady = true;
       }
-    }
+    });
 
-    // Inicializa la escena AR después de obtener el permiso
-    function initializeARScene() {
-      const scene = document.querySelector('a-scene');
-      scene.setAttribute('arjs', 'sourceType: webcam; detectionMode: mono_and_matrix; matrixCodeType: 3x3; debugUIEnabled: false; smooth: true; smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2;');
-      videoReady = true;
-      console.log("Escena AR inicializada");
-    }
-
-    // Verifica si el dispositivo es móvil
     function isMobile() {
       return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     }
 
-    // Configura el evento de clic para el botón de inicio
-    startButton.addEventListener('click', async function () {
+    // Iniciar la cámara y video solo después de la interacción del usuario en dispositivos móviles
+    startButton.addEventListener('click', function () {
       startButton.classList.add('hidden');
-      await requestCameraAccess();
+      videoReady = true;
+      // Inicializa el AR
+      document.querySelector("a-scene").setAttribute("arjs", "sourceType: webcam;");
     });
 
     // Reproduce el video cuando se detecta el marcador
@@ -98,7 +89,6 @@
     document.querySelector('a-marker').addEventListener('markerLost', function() {
       videoAR.pause();
     });
-
   </script>
 
 </body>
