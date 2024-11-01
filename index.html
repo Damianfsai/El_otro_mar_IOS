@@ -57,7 +57,7 @@
     var startButton = document.getElementById('startButton');
     var videoReady = false;
 
-    // Configura el tamaño del video en AR en la carga de la página
+    // Espera a que se cargue la página para habilitar el botón de inicio
     window.addEventListener('load', function () {
       if (isMobile()) {
         startButton.classList.remove('hidden');
@@ -72,10 +72,17 @@
 
     // Iniciar la cámara y video solo después de la interacción del usuario en dispositivos móviles
     startButton.addEventListener('click', function () {
-      startButton.classList.add('hidden');
+      // Inicializa la escena AR aquí
       videoReady = true;
-      // Inicializa el AR
-      document.querySelector("a-scene").setAttribute("arjs", "sourceType: webcam;");
+      startButton.classList.add('hidden');
+      document.querySelector('a-scene').setAttribute('arjs', 'sourceType: webcam;');
+      // Aquí también se puede agregar código para solicitar acceso a la cámara
+      const scene = document.querySelector('a-scene');
+      scene.enterVR = function () {
+        if (videoReady) {
+          document.querySelector('a-scene').setAttribute('arjs', 'sourceType: webcam;');
+        }
+      };
     });
 
     // Reproduce el video cuando se detecta el marcador
