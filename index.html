@@ -47,7 +47,7 @@
   </a-scene>
 
   <!-- Video oculto para AR -->
-  <video id="videoAR" loop playsinline style="display: none;">
+  <video id="videoAR" loop playsinline muted style="display: none;">
     <source src="MVI_1034_1.mp4" type="video/mp4">
     Tu navegador no soporta la reproducción de este video.
   </video>
@@ -56,6 +56,16 @@
     var videoAR = document.getElementById('videoAR');
     var startButton = document.getElementById('startButton');
     var videoReady = false;
+
+    // Solicitar permiso para acceder a la cámara
+    async function requestCameraAccess() {
+      try {
+        await navigator.mediaDevices.getUserMedia({ video: true });
+        console.log("Permiso para la cámara otorgado.");
+      } catch (error) {
+        console.error("Error al intentar acceder a la cámara:", error);
+      }
+    }
 
     // Configura el tamaño del video en AR en la carga de la página
     window.addEventListener('load', function () {
@@ -71,9 +81,12 @@
     }
 
     // Iniciar la cámara y video solo después de la interacción del usuario en dispositivos móviles
-    startButton.addEventListener('click', function () {
+    startButton.addEventListener('click', async function () {
       startButton.classList.add('hidden');
       videoReady = true;
+
+      // Solicitar acceso a la cámara antes de iniciar AR
+      await requestCameraAccess();
 
       // Activar el AR.js después de la interacción del usuario
       const scene = document.querySelector('a-scene');
